@@ -1,0 +1,44 @@
+import requests
+
+# Замените на свой Client ID и Client Secret
+CLIENT_ID = 'YOUR_CLIENT_ID'
+CLIENT_SECRET = 'YOUR_CLIENT_SECRET'
+VERSION = '20231023'  # Версия API, обычно используется дата. Можно использовать текущую дату.
+
+
+def search_venues_by_category(category_name):
+    base_url = 'https://api.foursquare.com/v2/venues/search'
+    params = {
+        'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,
+        'v': VERSION,
+        'near': 'New York, NY',  # Для примера, ищем места в Нью-Йорке. Можно заменить на другой город.
+        'query': category_name,
+        'limit': 10  # Ограничиваем количество результатов до 10. Можно изменить.
+    }
+
+    response = requests.get(base_url, params=params).json()
+    venues = response['response']['venues']
+
+    for venue in venues:
+        venue_name = venue['name']
+        address = venue['location'].get('address', 'Адрес не указан')
+
+        # Получаем рейтинг заведения
+        details_url = f"https://api.foursquare.com/v2/venues/{venue['id']}"
+        details_response = requests.get(details_url, params={
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'v': VERSION
+        }).json()
+        rating = details_response['response']['venue'].get('rating', 'Рейтинг не указан')
+
+        print(f"Название: {venue_name}")
+        print(f"Адрес: {address}")
+        print(f"Рейтинг: {rating}")
+        print('-' * 50)
+
+
+if __name__ == "__main__":
+    category = input("Введите интересующую вас категорию (например, кофейни, музеи, парки и т.д.): ")
+    search_venues_by_category(category)
